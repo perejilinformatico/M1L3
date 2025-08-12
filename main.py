@@ -1,45 +1,60 @@
 import discord
+from discord.ext import commands
+from Moneda_bot import Moneda
 from bot_logic import gen_pass
-from  Moneda_bot import Moneda
 
-# La variable intents almacena los privilegios del bot
 intents = discord.Intents.default()
-# Activar el privilegio de lectura de mensajes
 intents.message_content = True
-# Crear un bot en la variable cliente y transferirle los privilegios
-client = discord.Client(intents=intents)
 
-@client.event
+bot = commands.Bot(command_prefix='$', intents=intents)
+
+@bot.event
 async def on_ready():
-    print(f'✅ Hemos iniciado sesión como {client.user}')
-    print('El bot está listo para usar!')
+    print(f'We have logged in as {bot.user}')
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    
-    if message.content.startswith('$hello'):
-        await message.channel.send("Hi!")
-    elif message.content.startswith('$bye'):
-        await message.channel.send("👋")
-    elif message.content.startswith('$pass'):
-        await message.channel.send(gen_pass(pass_length=12))
-    elif message.content.startswith('$moneda'): 
-        await message.channel.send(Moneda())
+@bot.command()
+async def hello(ctx):
+    await ctx.send(f'Hola, soy un bot {bot.user}!')
+
+@bot.command()
+async def bye(ctx):
+    await ctx.send(f'Adios, soy el bot: {bot.user}!')
+
+@bot.command()
+async def heh(ctx, count_heh = 5):
+    await ctx.send("he" * count_heh)
+
+@bot.command()
+async def sumar(ctx, num1: int, num2: int):
+    resultado = num1 + num2 
+    await ctx.send(f"La Suma de {num1} y {num2} es: {resultado}")
+
+@bot.command()
+async def restar(ctx, num1: int, num2: int):
+    resultado = num1 - num2 
+    await ctx.send(f"La Resta de {num1} y {num2} es: {resultado}")
+
+@bot.command()
+async def multiplicar(ctx,num1: int, num2: int):
+    resultado = num1 * num2
+    await ctx.send(f"La multiplicacion de {num1}  y {num2} es: {resultado}")
+
+@bot.command()
+async def dividir(ctx, num1: int, num2: int):
+    if num2 == 0:
+        await ctx.send("No se puede dividir por cero.")
+    elif num1 == 0:
+        await ctx.send("No se puede dividir cero entre un numero.")
     else:
-        await message.channel.send(message.content)
+        resultado = num1 / num2
+        await ctx.send(f"La division de {num1} y {num2} es: {resultado}")
 
-TOKEN = "MTQwMjA3MzkxMzUyNTAxNDYzMA.Gb3ce1.sSCIQ681HhHz77adriE3tfTYdLro2G_m1NqUrY"
+@bot.command()
+async def moneda(ctx):
+    await ctx.send(Moneda())
 
-try:
-    client.run(TOKEN)
-except discord.LoginFailure:
-    print("❌ Error: Token inválido. ¿Regeneraste el token?")
-    input("Presiona Enter para cerrar...")
-except discord.HTTPException as e:
-    print(f"❌ Error HTTP: {e}")
-    input("Presiona Enter para cerrar...")
-except Exception as e:
-    print(f"❌ Error inesperado: {e}")
-    input("Presiona Enter para cerrar...")
+@bot.command()
+async def contraseña(ctx):
+    await ctx.send(gen_pass(pass_length=12))
+
+bot.run("TOKEN")
